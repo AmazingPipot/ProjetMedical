@@ -29,6 +29,7 @@ public:
     int height;
     int depth;
     DataType dataType;
+    int bytepix; // byte(s) per voxel/pixel
     int sliceStart;
     float voxelsize[3];
 
@@ -36,7 +37,7 @@ public:
 
     explicit ParserHDR();
     ~ParserHDR();
-    void load(QString filename);
+    bool load(QString filename);
 
     bool getImageXY(int sliceXY, QImage& image);
     bool getImageYZ(int sliceYZ, QImage& image);

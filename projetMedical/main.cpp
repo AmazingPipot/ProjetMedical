@@ -13,12 +13,18 @@ int main(int argc, char *argv[])
 
     ParserHDR parser;
     //parser.load("/auto_home/qleroit/IMAGERIE MEDICAL 3D/TP5/brain2.small");
-    parser.load("D:/fds/master2/imagerie_medicale/reconstruction_bin2");
+
+    //if(!parser.load("D:/fds/master2/imagerie_medicale/reconstruction_bin"))
+    if(!parser.load("D:/Google Drive/fds/M2_IMAGINA/HMIN318M_Imagerie_medicale_et_3D/TP/tp1/MR_head.Coronal"))
+    {
+        std::cerr << "Unable to load analyze7.5 file" << std::endl;
+        exit(1);
+    }
 
     QImage image;
-    if(!parser.getImageXY(256, image))
+    if(!parser.getImageXY(255, image))
     {
-        std::cerr << "Unable to get imageXY 256" << std::endl;
+        std::cerr << "Unable to get imageXY 255" << std::endl;
         exit(1);
     }
     image.save("sliceXY.jpg");

@@ -19,7 +19,7 @@ ParserHDR::~ParserHDR()
 
 }
 
-void ParserHDR::load(QString filename)
+bool ParserHDR::load(QString filename)
 {
     this->filename = filename;
 
@@ -57,7 +57,16 @@ void ParserHDR::load(QString filename)
         this->dataType = static_cast<DataType>(buffer16ToInt(buffer16));
         std::cout << "datatype: " << this->dataType << std::endl;
 
-        file.seekg(74, file.beg);
+        file.seekg(72, file.beg);
+
+        file.read(buffer16, 2);
+        this->bytepix = buffer16ToInt(buffer16) >> 3;
+        std::cout << "bytepix: " << this->bytepix << std::endl;
+        if (this->bytepix != 1 && this->bytepix != 2)
+        {
+            std::cerr << "format not supported (bytepix= " << this->bytepix << std::endl;
+            return false;
+        }
 
         file.read(buffer16, 2);
         this->sliceStart = buffer16ToInt(buffer16);
@@ -79,12 +88,13 @@ void ParserHDR::load(QString filename)
         std::cout << "voxel_depth: " << this->voxelsize[2] << std::endl;
 
         file.close();
+        return true;
     }
     else
     {
         std::cerr<< "Unable to open file" << std::endl;
+        return false;
     }
-
 }
 
 bool ParserHDR::getImageXY(int sliceXY, QImage& image)
@@ -108,16 +118,23 @@ bool ParserHDR::getImageXY(int sliceXY, QImage& image)
 
     image = QImage(this->width, this->height, QImage::Format::Format_RGB888);
 
-    char* buffer = new char[static_cast<size_t>(2 * this->width)];
+    char* buffer = new char[static_cast<size_t>(bytepix * this->width)];
 
-    file.seek(width * height * 2 * sliceXY);
+    file.seek(width * height * bytepix * sliceXY);
     int v;
     for (int j = 0; j < height; j++)
     {
-        file.read(buffer, 2 * width);
+        file.read(buffer, bytepix * width);
         for (int i = 0; i < width; ++i)
         {
-            v = static_cast<int>(((buffer[i*2]<<8)+buffer[i*2 + 1] + pow(2, 16) / 2) / pow(2, 16) * 255);
+            if (bytepix == 1)
+            {
+                v = static_cast<int>(buffer[i]);
+            }
+            else
+            {
+                v = static_cast<int>(((buffer[i*bytepix]<<8)+buffer[i*bytepix + 1] + pow(2, 16) / 2) / pow(2, 16) * 255);
+            }
             image.setPixel(i, j, qRgb(v, v, v));
         }
     }
@@ -154,19 +171,26 @@ bool ParserHDR::getImageYZ(int sliceYZ, QImage& image)
 
     image = QImage(this->depth, this->height, QImage::Format::Format_RGB888);
 
-    char* buffer = new char[2];
+    char* buffer = new char[static_cast<size_t>(bytepix)];
 
-    file.seek(sliceYZ * 2);
+    file.seek(sliceYZ * bytepix);
     int v;
     for (int i = 0; i < depth; ++i)
     {
         for (int j = 0; j < height; j++)
         {
             //file.QIODevice::seek(i * width * height * 2 + j * width * 2 + sliceYZ * 2);
-            file.read(buffer, 2);
-            v = static_cast<int>(((buffer[0]<<8)+buffer[1] + pow(2, 16) / 2) / pow(2, 16) * 255);
+            file.read(buffer, bytepix);
+            if (bytepix == 1)
+            {
+                v = static_cast<int>(buffer[0]);
+            }
+            else
+            {
+                v = static_cast<int>(((buffer[0]<<8)+buffer[1] + pow(2, 16) / 2) / pow(2, 16) * 255);
+            }
             image.setPixel(i, j, qRgb(v, v, v));
-            file.QFileDevice::seek(file.pos() + width * 2 - 2);
+            file.QFileDevice::seek(file.pos() + width * bytepix - bytepix);
         }
     }
 
@@ -202,19 +226,26 @@ bool ParserHDR::getImageXZ(int sliceXZ, QImage& image)
 
     image = QImage(this->width, this->depth, QImage::Format::Format_RGB888);
 
-    char* buffer = new char[static_cast<size_t>(this->width * 2)];
+    char* buffer = new char[static_cast<size_t>(this->width * bytepix)];
 
-    file.seek(width * 2 * sliceXZ);
+    file.seek(width * bytepix * sliceXZ);
     int v;
     for (int j = 0; j < depth; ++j)
     {
-        file.read(buffer, this->width * 2);
+        file.read(buffer, this->width * bytepix);
         for (int i = 0; i < width; ++i)
         {
-            v = static_cast<int>(((buffer[i*2]<<8)+buffer[(i*2)+1] + pow(2, 16) / 2) / pow(2, 16) * 255);
+            if (bytepix == 1)
+            {
+                v = static_cast<int>(buffer[i]);
+            }
+            else
+            {
+                v = static_cast<int>(((buffer[i*bytepix]<<8)+buffer[(i*bytepix)+1] + pow(2, 16) / 2) / pow(2, 16) * 255);
+            }
             image.setPixel(i, j, qRgb(v, v, v));
         }
-        file.QFileDevice::seek(file.pos() + (height-1) * width * 2);
+        file.QFileDevice::seek(file.pos() + (height-1) * width * bytepix);
     }
 
     delete[] buffer;
@@ -223,7 +254,7 @@ bool ParserHDR::getImageXZ(int sliceXZ, QImage& image)
     auto end = std::chrono::high_resolution_clock::now();
 
     std::chrono::duration<double> elapsed = (end - start);
-    std::cout << "sliceXZ " << sliceXZ << " generated in " << (elapsed.count() * 1000) << "ms (" << std::to_string(this->depth * this->height) << " pixels)" << std::endl;
+    std::cout << "sliceXZ " << sliceXZ << " generated in " << (elapsed.count() * 1000) << "ms (" << std::to_string(this->depth * this->width) << " pixels)" << std::endl;
 
     return true;
 }
