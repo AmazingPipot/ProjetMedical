@@ -1,7 +1,7 @@
 #include "parserhdr.h"
 #include <iostream>
 #include <fstream>
-#include <string.h>
+#include <string>
 #define cimg_display 0
 #include <CImg.h>
 #include <limits>
@@ -19,54 +19,12 @@ ParserHDR::~ParserHDR()
 
 }
 
-
-bool ParserHDR::readIMG(QString filename)
+void ParserHDR::load(QString filename)
 {
-    auto start = std::chrono::high_resolution_clock::now();
+    this->filename = filename;
 
-    QFile file(filename);
-    if (!file.open(QIODevice::ReadOnly))
-    {
-        std::cerr << "Unable to open file: " << filename.toStdString() << std::endl;
-        return false;
-    }
-
-    std::cout << ".img file size: " << file.size() << std::endl;
-
-    QImage test(this->width, this->height, QImage::Format::Format_RGB888);
-
-    char* buffer = new char[static_cast<size_t>(2 * this->width * this->height)];
-
-    const int sliceToDisplay = 348;
-
-    file.seek(width * height * 2 * sliceToDisplay);
-    int v;
-    for (int j = 0; j < height; j++)
-    {
-        file.read(buffer, 2 * width);
-        for (int i = 0; i < width; ++i)
-        {
-            v = static_cast<int>(((buffer[i*2]<<8)+buffer[i*2 + 1] + pow(2, 16) / 2) / pow(2, 16) * 255);
-            test.setPixel(i, j, qRgb(v, v, v));
-        }
-    }
-
-    delete[] buffer;
-
-    auto end = std::chrono::high_resolution_clock::now();
-
-    std::chrono::duration<double> elapsed = (end - start);
-    std::cout << "slice " << sliceToDisplay << " generated in " << (elapsed.count() * 1000) << "ms" << std::endl;
-
-    test.save("slice.jpg");
-
-    return true;
-}
-
-void ParserHDR::readHDR(QString filename)
-{
     std::ifstream file;
-    file.open(filename.toStdString().c_str(), std::ios::in | std::ios::binary);
+    file.open(filename.toStdString() + ".hdr", std::ios::in | std::ios::binary);
 
     char buffer16[2];
     char buffer32[4];
@@ -127,6 +85,147 @@ void ParserHDR::readHDR(QString filename)
         std::cerr<< "Unable to open file" << std::endl;
     }
 
+}
+
+bool ParserHDR::getImageXY(int sliceXY, QImage& image)
+{
+    if (sliceXY < 0 || sliceXY > depth - 1)
+    {
+        std::cerr << "sliceXY not in range(" << 0 << ", " << (depth - 1) << ")" << std::endl;
+        return false;
+    }
+
+    auto start = std::chrono::high_resolution_clock::now();
+
+    QFile file(this->filename + ".img");
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        std::cerr << "Unable to open file: " << filename.toStdString() + ".img" << std::endl;
+        return false;
+    }
+
+    // std::cout << ".img file size: " << file.size() << std::endl;
+
+    image = QImage(this->width, this->height, QImage::Format::Format_RGB888);
+
+    char* buffer = new char[static_cast<size_t>(2 * this->width)];
+
+    file.seek(width * height * 2 * sliceXY);
+    int v;
+    for (int j = 0; j < height; j++)
+    {
+        file.read(buffer, 2 * width);
+        for (int i = 0; i < width; ++i)
+        {
+            v = static_cast<int>(((buffer[i*2]<<8)+buffer[i*2 + 1] + pow(2, 16) / 2) / pow(2, 16) * 255);
+            image.setPixel(i, j, qRgb(v, v, v));
+        }
+    }
+
+    delete[] buffer;
+    file.close();
+
+    auto end = std::chrono::high_resolution_clock::now();
+
+    std::chrono::duration<double> elapsed = (end - start);
+    std::cout << "sliceXY " << sliceXY << " generated in " << (elapsed.count() * 1000) << "ms (" << (this->width * this->height) << " pixels)" << std::endl;
+
+    return true;
+}
+
+bool ParserHDR::getImageYZ(int sliceYZ, QImage& image)
+{
+    if (sliceYZ < 0 || sliceYZ > width - 1)
+    {
+        std::cerr << "sliceZY not in range(" << 0 << ", " << (width - 1) << ")" << std::endl;
+        return false;
+    }
+
+    auto start = std::chrono::high_resolution_clock::now();
+
+    QFile file(this->filename + ".img");
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        std::cerr << "Unable to open file: " << filename.toStdString() + ".img" << std::endl;
+        return false;
+    }
+
+    // std::cout << ".img file size: " << file.size() << std::endl;
+
+    image = QImage(this->depth, this->height, QImage::Format::Format_RGB888);
+
+    char* buffer = new char[2];
+
+    file.seek(sliceYZ * 2);
+    int v;
+    for (int i = 0; i < depth; ++i)
+    {
+        for (int j = 0; j < height; j++)
+        {
+            //file.QIODevice::seek(i * width * height * 2 + j * width * 2 + sliceYZ * 2);
+            file.read(buffer, 2);
+            v = static_cast<int>(((buffer[0]<<8)+buffer[1] + pow(2, 16) / 2) / pow(2, 16) * 255);
+            image.setPixel(i, j, qRgb(v, v, v));
+            file.QFileDevice::seek(file.pos() + width * 2 - 2);
+        }
+    }
+
+    delete[] buffer;
+    file.close();
+
+    auto end = std::chrono::high_resolution_clock::now();
+
+    std::chrono::duration<double> elapsed = (end - start);
+    std::cout << "sliceYZ " << sliceYZ << " generated in " << (elapsed.count() * 1000) << "ms (" << std::to_string(this->depth * this->height) << " pixels)" << std::endl;
+
+    return true;
+}
+
+bool ParserHDR::getImageXZ(int sliceXZ, QImage& image)
+{
+    if (sliceXZ < 0 || sliceXZ > height - 1)
+    {
+        std::cerr << "sliceZY not in range(" << 0 << ", " << (width - 1) << ")" << std::endl;
+        return false;
+    }
+
+    auto start = std::chrono::high_resolution_clock::now();
+
+    QFile file(this->filename + ".img");
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        std::cerr << "Unable to open file: " << filename.toStdString() + ".img" << std::endl;
+        return false;
+    }
+
+    // std::cout << ".img file size: " << file.size() << std::endl;
+
+    image = QImage(this->width, this->depth, QImage::Format::Format_RGB888);
+
+    char* buffer = new char[static_cast<size_t>(this->width * 2)];
+
+    file.seek(width * 2 * sliceXZ);
+    int v;
+    for (int j = 0; j < depth; ++j)
+    {
+        file.read(buffer, this->width * 2);
+        for (int i = 0; i < width; ++i)
+        {
+            v = static_cast<int>(((buffer[i*2]<<8)+buffer[(i*2)+1] + pow(2, 16) / 2) / pow(2, 16) * 255);
+            image.setPixel(i, j, qRgb(v, v, v));
+        }
+        file.QFileDevice::seek(file.pos() + (height-1) * width * 2);
+    }
+
+    delete[] buffer;
+    file.close();
+
+    auto end = std::chrono::high_resolution_clock::now();
+
+    std::chrono::duration<double> elapsed = (end - start);
+    std::cout << "sliceXZ " << sliceXZ << " generated in " << (elapsed.count() * 1000) << "ms (" << std::to_string(this->depth * this->height) << " pixels)" << std::endl;
+
+    return true;
 }
 
 int ParserHDR::buffer32ToInt(char* buffer)

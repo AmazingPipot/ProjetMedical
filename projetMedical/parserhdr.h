@@ -32,10 +32,15 @@ public:
     int sliceStart;
     float voxelsize[3];
 
+    QString filename;
+
     explicit ParserHDR();
     ~ParserHDR();
-    void readHDR(QString filename);
-    bool readIMG(QString filename);
+    void load(QString filename);
+
+    bool getImageXY(int sliceXY, QImage& image);
+    bool getImageYZ(int sliceYZ, QImage& image);
+    bool getImageXZ(int sliceXZ, QImage& image);
 
 private:
     int buffer32ToInt(char* buffer32);
