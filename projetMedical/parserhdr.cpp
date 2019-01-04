@@ -2,12 +2,12 @@
 #include <iostream>
 #include <fstream>
 #include <string.h>
-#define cimg_display 0
-#include <CImg.h>
+//#define cimg_display 0
+//#include <CImg.h>
 #include <limits>
 #include <chrono>
 
-using namespace cimg_library;
+//using namespace cimg_library;
 
 ParserHDR::ParserHDR()
 {
@@ -18,7 +18,6 @@ ParserHDR::~ParserHDR()
 {
 
 }
-
 
 bool ParserHDR::readIMG(QString filename)
 {
@@ -37,9 +36,10 @@ bool ParserHDR::readIMG(QString filename)
 
     char* buffer = new char[static_cast<size_t>(2 * this->width * this->height)];
 
-    const int sliceToDisplay = 348;
+    const int sliceToDisplay = 108;
 
-    file.seek(width * height * 2 * sliceToDisplay);
+    file.seek(2 * width * height * sliceToDisplay);
+
     int v;
     for (int j = 0; j < height; j++)
     {
@@ -50,15 +50,15 @@ bool ParserHDR::readIMG(QString filename)
             test.setPixel(i, j, qRgb(v, v, v));
         }
     }
-
     delete[] buffer;
+    test.save("slice.jpg");
 
     auto end = std::chrono::high_resolution_clock::now();
 
     std::chrono::duration<double> elapsed = (end - start);
     std::cout << "slice " << sliceToDisplay << " generated in " << (elapsed.count() * 1000) << "ms" << std::endl;
 
-    test.save("slice.jpg");
+
 
     return true;
 }

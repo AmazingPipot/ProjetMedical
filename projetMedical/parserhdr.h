@@ -32,7 +32,7 @@ public:
     int sliceStart;
     float voxelsize[3];
 
-    explicit ParserHDR();
+    explicit ParserHDR(ParserHDR parse);
     ~ParserHDR();
     void readHDR(QString filename);
     bool readIMG(QString filename);
