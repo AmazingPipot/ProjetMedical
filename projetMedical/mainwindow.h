@@ -8,6 +8,7 @@
 #include <QGridLayout>
 #include "parserhdr.h"
 #include <iostream>
+#include <QPainter>
 
 namespace Ui {
 class MainWindow;
@@ -48,8 +49,11 @@ public:
     QString name = "Detaillée";
     QString name2 = "";
 
+    int Zoom = 2;
+    int ZoomX1, ZoomX2, ZoomY1, ZoomY2, HB, GD;
     int slice;
     int Axe;
+    QPainter painter;
 
     ~MainWindow();
     Ui::MainWindow *ui;
@@ -59,6 +63,9 @@ private:
     void wheelEvent(QWheelEvent *e);
     void mouseReleaseEvent(QMouseEvent *e);
     void mousePressEvent(QMouseEvent *e);
+    void keyReleaseEvent(QKeyEvent *e);
+    void paintEvent(QPaintEvent *);
+
     void affichageImages();
     void clickImage();
     void gestionSliceImage(int index);
