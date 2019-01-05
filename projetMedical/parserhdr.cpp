@@ -216,6 +216,7 @@ bool ParserHDR::getImageYZ(int sliceYZ, QImage& image)
                 v = 0;
             }
             image.setPixel(i, j, qRgb(v, v, v));
+
             file.skip(width * bytepix - bytepix);
         }
     }

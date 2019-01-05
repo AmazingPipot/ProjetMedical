@@ -28,10 +28,24 @@ int main(int argc, char *argv[])
         std::cerr << "Unable to get imageXY " << parser.depth / 2 << std::endl;
         exit(1);
     }
-    image.save("sliceXY.jpg");
+    image.save("sliceYZ.jpg");
 
-    /*
-    /////// tests ///////
+    if(!parser.getImageYZ(parser.width / 2, image))
+    {
+        std::cerr << "Unable to get imageYZ " << parser.width / 2 << std::endl;
+        exit(1);
+    }
+    image.save("sliceYZ.jpg");
+
+    if(!parser.getImageXZ(parser.height / 2, image))
+    {
+        std::cerr << "Unable to get imageXZ " << parser.height / 2 << std::endl;
+        exit(1);
+    }
+    image.save("sliceXZ.jpg");
+
+
+    /*/////// tests ///////
     if(!parser.getImageXY(parser.depth / 2, QRect(0, 0, parser.width, parser.height), image))
     {
         std::cerr << "Unable to get imageXY " << parser.depth / 2 << std::endl;
@@ -95,19 +109,30 @@ int main(int argc, char *argv[])
         std::cerr << "Unable to get rect imageXZ " << parser.width / 2 << std::endl;
         exit(1);
     }
-    image.save("sliceXZrect2.jpg");
+    image.save("sliceXZrect2.jpg");*/
 
-    return 0;
+    //return 0;
     
-    */
 
-    MainWindow w(parser);
-    w.setWindowTitle("Imagerie Medicale");
-    w.setCentralWidget(w.widget);
-    //w.setMinimumSize(1024,768);
-    //w.setMaximumSize(1024,768);
-    //w.update();
-    w.show();
+    MainWindow wDetaille(parser,"sliceXY","Image XY"," Detaillée",parser.depth);
+    wDetaille.setWindowTitle(wDetaille.name+wDetaille.name2+" : "+QString::number(wDetaille.slice)+" / "+QString::number(wDetaille.Axe));
+    wDetaille.setCentralWidget(wDetaille.widget);
+    wDetaille.show();
+
+    MainWindow w1(parser,"sliceXY","Image XY","", parser.depth);
+    w1.setCentralWidget(w1.widget);
+    w1.Window = &wDetaille;
+    w1.show();
+
+    MainWindow w2(parser,"sliceYZ","Image YZ","",parser.width);
+    w2.setCentralWidget(w2.widget);
+    w2.Window = &wDetaille;
+    w2.show();
+
+    MainWindow w3(parser,"sliceXZ","Image XZ","",parser.height);
+    w3.setCentralWidget(w3.widget);
+    w3.Window = &wDetaille;
+    w3.show();
 
     return a.exec();
 }

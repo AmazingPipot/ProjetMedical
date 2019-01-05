@@ -18,33 +18,44 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(ParserHDR parse, QWidget *parent = 0);
 
+    explicit MainWindow(ParserHDR parse, QString fil, QString nam1, QString nam2, int axe, QWidget *parent = 0);
+
+
+    MainWindow *Window = this;
     QWidget *widget = new QWidget;
     QPixmap *pixmap_img1;
-    QPixmap *pixmap_img2;
+   /* QPixmap *pixmap_img2;
     QPixmap *pixmap_img3;
-    QPixmap *pixmap_imgPrecise;
+    QPixmap *pixmap_imgPrecise;*/
     ParserHDR Parser;
-    int sliceXY = 0;
+    /*int sliceXY = 0;
     int sliceYZ = 0;
-    int sliceXZ = 0;
-    QLabel  *labelPrecis  = new QLabel;
+    int sliceXZ = 0;*/
+    //QLabel  *labelPrecis  = new QLabel;
     QLabel  *label1  = new QLabel;
-    QLabel  *label2  = new QLabel;
-    QLabel  *label3  = new QLabel;
+    /*QLabel  *label2  = new QLabel;
+    QLabel  *label3  = new QLabel;*/
 
     QString filename;
+
 
     int MouseX = 0;
     int MouseY = 0;
     int MouseX2 = 0;
     int MouseY2 = 0;
 
+    QString name = "Detaillée";
+    QString name2 = "";
+
+    int slice;
+    int Axe;
+
     ~MainWindow();
+    Ui::MainWindow *ui;
 
 private:
-    Ui::MainWindow *ui;
+
     void wheelEvent(QWheelEvent *e);
     void mouseReleaseEvent(QMouseEvent *e);
     void mousePressEvent(QMouseEvent *e);
@@ -52,6 +63,7 @@ private:
     void clickImage();
     void gestionSliceImage(int index);
     void coordonneZoom();
+    void rechargeInformatin(QString fil, QString nam1, int axe, int sli);
 };
 
 #endif // MAINWINDOW_H
