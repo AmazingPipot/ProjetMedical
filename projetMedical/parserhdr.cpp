@@ -121,7 +121,7 @@ bool ParserHDR::getImageXY(int sliceXY, QImage& image)
 
     char* buffer = new char[static_cast<size_t>(bytepix * this->width)];
 
-    if(!file.seek(static_cast<qint64>(this->width * this->height * this->bytepix * sliceXY)))
+    if(!file.skip(static_cast<int64_t>(this->width) * this->height * this->bytepix * sliceXY))
     {
         std::cout <<"ko" << std::endl;
     }
@@ -140,7 +140,7 @@ bool ParserHDR::getImageXY(int sliceXY, QImage& image)
             }
             else
             {
-                v = static_cast<int>(((buffer[i*this->bytepix]<<8)+buffer[i*this->bytepix + 1] + pow(2, 15)) / pow(2, 16) * 255);
+                v = static_cast<int>(((static_cast<short>(buffer[i*this->bytepix]<<8))+static_cast<short>(buffer[i*this->bytepix + 1]) + pow(2, 15)) / pow(2, 16) * 255);
             }
             // clamp value
             if (v > 255)
