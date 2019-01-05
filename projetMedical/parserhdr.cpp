@@ -19,6 +19,7 @@ ParserHDR::~ParserHDR()
 
 }
 
+
 bool ParserHDR::load(QString filename)
 {
     this->filename = filename;

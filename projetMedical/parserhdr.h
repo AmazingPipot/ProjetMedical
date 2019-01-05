@@ -36,6 +36,7 @@ public:
     QString filename;
 
     explicit ParserHDR();
+
     ~ParserHDR();
     bool load(QString filename);
 
