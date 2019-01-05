@@ -43,6 +43,10 @@ public:
     bool getImageYZ(int sliceYZ, QImage& image);
     bool getImageXZ(int sliceXZ, QImage& image);
 
+    bool getImageXY(int sliceXY, QRect rect, QImage& image);
+    bool getImageYZ(int sliceYZ, QRect rect, QImage& image);
+    bool getImageXZ(int sliceXZ, QRect rect, QImage& image);
+
 private:
     int buffer32ToInt(char* buffer32);
     int buffer16ToInt(char* buffer16);
