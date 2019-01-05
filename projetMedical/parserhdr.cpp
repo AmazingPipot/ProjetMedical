@@ -121,10 +121,10 @@ bool ParserHDR::getImageXY(int sliceXY, QImage& image)
 
     char* buffer = new char[static_cast<size_t>(bytepix * this->width)];
 
-    /*if(!file.skip(static_cast<int64_t>(this->width) * this->height * this->bytepix * sliceXY))
+    if(!file.skip(static_cast<int64_t>(this->width) * this->height * this->bytepix * sliceXY))
     {
         std::cout <<"ko" << std::endl;
-    }*/
+    }
     int v;
     for (int j = 0; j < this->height; j++)
     {
@@ -217,7 +217,7 @@ bool ParserHDR::getImageYZ(int sliceYZ, QImage& image)
             }
             image.setPixel(i, j, qRgb(v, v, v));
 
-            //file.skip(width * bytepix - bytepix);
+            file.skip(width * bytepix - bytepix);
         }
     }
 
@@ -272,7 +272,7 @@ bool ParserHDR::getImageXZ(int sliceXZ, QImage& image)
             }
             image.setPixel(i, j, qRgb(v, v, v));
         }
-        //file.QFileDevice::skip((height-1) * width * bytepix);
+        file.QFileDevice::skip((height-1) * width * bytepix);
     }
 
     delete[] buffer;
@@ -326,7 +326,7 @@ bool ParserHDR::getImageXY(int sliceXY, QRect rect, QImage& image)
             }
             image.setPixel(i, j, qRgb(v, v, v));
         }
-        //file.skip((width - rect.width()) * bytepix);
+        file.skip((width - rect.width()) * bytepix);
     }
 
     delete[] buffer;
@@ -367,7 +367,7 @@ bool ParserHDR::getImageYZ(int sliceYZ, QRect rect, QImage& image)
     int v;
     for (int i = 0; i < rect.width(); ++i)
     {
-        //file.skip(rect.y() * width * bytepix);
+        file.skip(rect.y() * width * bytepix);
         for (int j = 0; j < rect.height(); j++)
         {
             //file.QIODevice::seek(i * width * height * 2 + j * width * 2 + sliceYZ * 2);
@@ -391,9 +391,9 @@ bool ParserHDR::getImageYZ(int sliceYZ, QRect rect, QImage& image)
                 v = 0;
             }
             image.setPixel(i, j, qRgb(v, v, v));
-            //file.skip(width * bytepix - bytepix);
+            file.skip(width * bytepix - bytepix);
         }
-        //file.skip((height - rect.height() - rect.y()) * width * bytepix);
+        file.skip((height - rect.height() - rect.y()) * width * bytepix);
     }
 
     delete[] buffer;
@@ -447,7 +447,7 @@ bool ParserHDR::getImageXZ(int sliceXZ, QRect rect, QImage& image)
             }
             image.setPixel(i, j, qRgb(v, v, v));
         }
-        //file.QFileDevice::skip((height-1) * width * bytepix + (width - rect.width()) * bytepix);
+        file.QFileDevice::skip((height-1) * width * bytepix + (width - rect.width()) * bytepix);
     }
 
     delete[] buffer;
