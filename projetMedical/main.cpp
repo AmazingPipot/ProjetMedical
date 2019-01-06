@@ -22,6 +22,14 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
+    /*
+    if(!parser.loadSubsampled(4))
+    {
+        std::cerr << "Unable to load SD file with coef " << 4 << std::endl;
+        exit(1);
+    }
+    */
+
     QImage image;
     if(!parser.getImageXY(parser.depth / 2, image))
     {
@@ -29,6 +37,8 @@ int main(int argc, char *argv[])
         exit(1);
     }
     image.save("sliceYZ.jpg");
+
+     return 0;
 
     if(!parser.getImageYZ(parser.width / 2, image))
     {

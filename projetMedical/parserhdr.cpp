@@ -16,7 +16,7 @@ ParserHDR::ParserHDR()
 
 ParserHDR::~ParserHDR()
 {
-
+    delete[] dataSubsampled;
 }
 
 
@@ -89,6 +89,9 @@ bool ParserHDR::load(QString filename)
         std::cout << "voxel_depth: " << this->voxelsize[2] << std::endl;
 
         file.close();
+
+        headerLoaded = true;
+
         return true;
     }
     else
@@ -98,11 +101,132 @@ bool ParserHDR::load(QString filename)
     }
 }
 
+bool ParserHDR::loadSubsampled(int coef)
+{
+    this->coef = coef;
+
+    auto start = std::chrono::high_resolution_clock::now();
+
+    QFile file(this->filename + ".img");
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        std::cerr << "Unable to open file: " << filename.toStdString() + ".img" << std::endl;
+        return false;
+    }
+
+    std::cout << ".img file size: " << file.size() << std::endl;
+
+    const int widthSD = width / coef;
+    const int heightSD = height / coef;
+    const int depthSD = depth / coef;
+
+    dataSubsampled = new short[static_cast<size_t>(widthSD * heightSD * depthSD)];
+
+    char* buffer = new char[static_cast<size_t>(this->width * this->bytepix)];
+    short*** dataTemp = new short**[static_cast<size_t>(coef)];
+    for (int k = 0; k < coef; k++)
+    {
+        dataTemp[k] = new short*[static_cast<size_t>(this->height)];
+        for (int j = 0; j < this->height; j++)
+        {
+            dataTemp[k][j] = new short[static_cast<size_t>(this->width)];
+        }
+    }
+
+    int sum;
+    for (int d = 0; d < depthSD; d++)
+    {
+        std::cout << d / (depthSD - 1.0f) * 100.0f << "%" << std::endl;
+
+        for (int k = 0; k < coef; k++)
+        {
+            for (int j = 0; j < this->height; j++)
+            {
+                file.read(buffer, this->width * this->bytepix);
+                for (int i = 0; i < this->width; i++)
+                {
+                    if (this->bytepix == 1)
+                    {
+                        dataTemp[k][j][i] = static_cast<short>(buffer[i]);
+                    }
+                    else
+                    {
+                        dataTemp[k][j][i] = static_cast<short>(((static_cast<short>(buffer[i*this->bytepix]<<8))+static_cast<short>(buffer[i*this->bytepix + 1]) + pow(2, 15)) / pow(2, 16) * 255);
+                    }
+                }
+            }
+        }
+
+        for (int y = 0; y < heightSD; y++)
+        {
+            for (int x = 0; x < widthSD; x++)
+            {
+                sum = 0;
+                for (int k = 0; k < coef; k++)
+                {
+                    for (int j = 0; j < coef; j++)
+                    {
+                        for (int i = 0; i < coef; i++)
+                        {
+                            sum += dataTemp[k][y*coef+j][x*coef+i];
+                        }
+                    }
+                }
+                short result = static_cast<short>(sum / (coef * coef * coef));
+                //std::cerr << "result: " << result << std::endl;
+                dataSubsampled[d * heightSD * widthSD + y * widthSD + x] = result;
+            }
+        }
+    }
+
+    /*
+    QImage image = QImage(widthSD, heightSD, QImage::Format::Format_RGB888);
+
+    for (int j = 0; j < heightSD; j++)
+    {
+        for (int i = 0; i < widthSD; ++i)
+        {
+            short v = dataSD[100 * widthSD * heightSD + j * widthSD + i];
+            image.setPixel(i, j, qRgb(v, v, v));
+        }
+    }
+    image.save("imageSD.jpg");
+    */
+
+    // free
+    for (int k = 0; k < coef; k++)
+    {
+        for (int j = 0; j < this->height; j++)
+        {
+            delete[] dataTemp[k][j];
+        }
+        delete[] dataTemp[k];
+    }
+    delete[] dataTemp;
+
+    delete[] buffer;
+    file.close();
+
+    auto end = std::chrono::high_resolution_clock::now();
+
+    std::chrono::duration<double> elapsed = (end - start);
+    std::cout << "image SD with coef " << coef << " generated in " << (elapsed.count() * 1000) << "ms (w:" << widthSD << " h:" << heightSD << " d: " << depthSD << ", " << (widthSD * heightSD * depthSD) << " pixels)" << std::endl;
+
+    dataSubsampledLoaded = true;
+    return true;
+}
+
 bool ParserHDR::getImageXY(int sliceXY, QImage& image)
 {
     if (sliceXY < 0 || sliceXY > depth - 1)
     {
-        std::cerr << "sliceXY not in range(" << 0 << ", " << (depth - 1) << ")" << std::endl;
+        std::cerr << "SliceXY not in range(" << 0 << ", " << (depth - 1) << ")" << std::endl;
+        return false;
+    }
+
+    if (!this->headerLoaded)
+    {
+        std::cerr << "Header is not loaded" << std::endl;
         return false;
     }
 
@@ -115,7 +239,7 @@ bool ParserHDR::getImageXY(int sliceXY, QImage& image)
         return false;
     }
 
-    std::cout << ".img file size: " << file.size() << std::endl;
+    //std::cout << ".img file size: " << file.size() << std::endl;
 
     image = QImage(this->width, this->height, QImage::Format::Format_RGB888);
 

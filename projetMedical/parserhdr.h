@@ -35,10 +35,16 @@ public:
 
     QString filename;
 
+    short* dataSubsampled;
+    int coef;
+    bool headerLoaded;
+    bool dataSubsampledLoaded;
+
     explicit ParserHDR();
 
     ~ParserHDR();
     bool load(QString filename);
+    bool loadSubsampled(int coef);
 
     bool getImageXY(int sliceXY, QImage& image);
     bool getImageYZ(int sliceYZ, QImage& image);
