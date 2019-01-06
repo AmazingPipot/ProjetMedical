@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
         std::cerr << "Unable to get imageXY " << parser.depth / 2 << std::endl;
         exit(1);
     }
-    image.save("sliceYZ.jpg");
+    image.save("sliceXY.jpg");
 
      return 0;
 
@@ -144,5 +144,8 @@ int main(int argc, char *argv[])
     w3.Window = &wDetaille;
     w3.show();
 
+    QTimer Time;
+    QObject::connect(&Time,SIGNAL(timeout()), &wDetaille, SLOT(update()));
+    Time.start(100);
     return a.exec();
 }
