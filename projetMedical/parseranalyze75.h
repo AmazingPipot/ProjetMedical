@@ -22,7 +22,7 @@ enum DataType
     DT_ALL = 255
 };
 
-class ParserHDR
+class ParserAnalyze75
 {
 public:
     int width;
@@ -40,9 +40,9 @@ public:
     bool headerLoaded;
     bool dataSubsampledLoaded;
 
-    explicit ParserHDR();
+    explicit ParserAnalyze75();
 
-    ~ParserHDR();
+    ~ParserAnalyze75();
     bool load(QString filename);
     bool loadSubsampled(int coef);
 
@@ -58,6 +58,11 @@ private:
     int buffer32ToInt(char* buffer32);
     int buffer16ToInt(char* buffer16);
     float buffer32ToFloat(char* buffer32);
+
+    inline short getPixelValue255(short b1, short b2)
+    {
+        return static_cast<short>(((b1<<8)+b2 + static_cast<double>(0x8000)) / static_cast<double>(0x10000) * 255);
+    }
 };
 
 #endif // PARSERHDR_H

@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include <QApplication>
 #include <iostream>
-#include "parserhdr.h"
+#include "parseranalyze75.h"
 #include <QApplication>
 #include <QtGui>
 #include <QLabel>
@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    ParserHDR parser;
+    ParserAnalyze75 parser;
 
     //if(!parser.load("D:/fds/master2/imagerie_medicale/reconstruction_bin2"))
     //if(!parser.load("D:/Google Drive/fds/M2_IMAGINA/HMIN318M_Imagerie_medicale_et_3D/TP/tp1/MR_head.Coronal"))
