@@ -6,7 +6,7 @@
 #include <QTimer>
 
 
-MainWindow::MainWindow(ParserHDR parse, QString fil, QString nam1, QString nam2, int axe, QWidget *parent) :
+MainWindow::MainWindow(ParserAnalyze75 parse, QString fil, QString nam1, QString nam2, int axe, QWidget *parent) :
     QMainWindow(parent),
     Parser(parse),
     Axe(axe),
@@ -22,12 +22,10 @@ MainWindow::MainWindow(ParserHDR parse, QString fil, QString nam1, QString nam2,
     }
     else
     {
-        Zoom = 2;
+        Zoom = 1;
     }
     ui->setupUi(this);
     affichageImages();
-    //paintEvent();
-    //this->setWindowTitle(name+name2+" : "+QString::number(slice)+" / "+QString::number(Axe));
 }
 
 MainWindow::~MainWindow()
@@ -82,6 +80,62 @@ void MainWindow::wheelEvent(QWheelEvent *e){
 }
 void MainWindow::keyReleaseEvent(QKeyEvent *e)
 {
+    if (Zoom > 1)
+    {
+
+            if (e->key() == Qt::Key_Left)
+            {
+                if (ZoomX1 > 0)
+                {
+                posX -= 200/Zoom;
+                }
+                else
+                {
+                    posX = pixmap_img1->width()/(Zoom+1);
+                }
+            }
+
+
+            if (e->key() == Qt::Key_Right)
+            {
+                if (ZoomX2 < pixmap_img1->width())
+                {
+                    posX += 200/Zoom;
+                }
+                else
+                {
+                    posX = ZoomX2-pixmap_img1->width()/(Zoom+1);
+                }
+            }
+
+
+
+            if (e->key() == Qt::Key_Up)
+            {
+                if (ZoomY1 > 0)
+                {
+                    posY -= 200/Zoom;
+                }
+                else
+                {
+                    posY = pixmap_img1->height()/(Zoom+1);
+                }
+            }
+
+
+
+            if (e->key() == Qt::Key_Down)
+            {
+                if (ZoomY2 < pixmap_img1->height())
+                {
+                    posY += 200/Zoom;
+                }
+                else
+                {
+                    posY = ZoomY2-pixmap_img1->height()/(Zoom+1);
+                }
+            }
+    }
     switch(e->key()){
         case Qt::Key_Plus:
         if (name2 != "")
@@ -111,20 +165,6 @@ void MainWindow::keyReleaseEvent(QKeyEvent *e)
             gestionSliceImage(0);
         }
         break;
-        case Qt::Key_Left:
-            GD -= 200/Zoom;
-        break;
-        case Qt::Key_Right:
-            GD += 200/Zoom;;
-        break;
-        case Qt::Key_Up:
-            HB -= 200/Zoom;
-            fprintf(stderr,"%d \n",Zoom);
-        break;
-        case Qt::Key_Down:
-            HB += 200/Zoom;
-            fprintf(stderr,"%d \n",Zoom);
-        break;
         default : break;
     }
     if (Zoom < 1)
@@ -142,50 +182,106 @@ void MainWindow::paintEvent(QPaintEvent *e) {
     {
         QRectF source;
         QRectF target(0,0,pixmap_img1->width()/2,pixmap_img1->height()/2);
+        this->setWindowTitle(name+name2+" : "+QString::number(slice)+" / "+QString::number(Axe)+"  Zoom : "
+                             +QString::number(Zoom)+"x  position x :"+QString::number((ZoomX2+ZoomX1)/2)+" / "+QString::number(pixmap_img1->width())
+                             +" y :"+QString::number((ZoomY1+ZoomY2)/2)+" / "+QString::number(pixmap_img1->height()));
         if (Zoom == 1)
         {
             source.adjust(0,0,pixmap_img1->width(),pixmap_img1->height());
             ZoomX1 = 0;
             ZoomX2 = pixmap_img1->width();
             ZoomY1 = 0;
-            ZoomY1 = pixmap_img1->height();
-            HB = 0;
-            GD = 0;
+            ZoomY2 = pixmap_img1->height();
+            posY = pixmap_img1->height()/2;
+            posX = pixmap_img1->width()/2;
         }
         else
         {
-            int w1 = pixmap_img1->width()/Zoom;
+            int w1 = pixmap_img1->width()/(Zoom+1);
+
+            ZoomX1 = posX-w1;
+            ZoomX2 = posX+w1;
+
+            w1 = pixmap_img1->height()/(Zoom+1);
+            ZoomY1 = posY-w1;
+            ZoomY2 = posY+w1;
+
+
+            /*int w1 = pixmap_img1->width()/(Zoom+1);
             int w2 = pixmap_img1->width()/2;
+            bool bloc = false;
+            zx1 = ZoomX1;
+            zx2 = ZoomX2;
+            zy1 = ZoomY1;
+            zy2 = ZoomY2;
 
             ZoomX1 = w2-w1+GD;
             ZoomX2 = w2+w1+GD;
-            w1 = pixmap_img1->height()/Zoom;
+
+            w1 = pixmap_img1->height()/(Zoom+1);
             w2 = pixmap_img1->height()/2;
+
             ZoomY1 = w2-w1+HB;
             ZoomY2 = w2+w1+HB;
 
             if (ZoomX1 < 0)
             {
                 ZoomX1 = 0;
+                ZoomX2 = 2 * w1;
+                blocX1 = true;
+            }
+            else
+            {
+                blocX1 = false;
             }
             if (ZoomX2 > pixmap_img1->width())
             {
                 ZoomX2 = pixmap_img1->width();
+                blocX2 = true;
+            }
+            else
+            {
+                blocX2 = false;
             }
             if (ZoomY1 < 0)
             {
                 ZoomY1 = 0;
+                blocY1 = true;
+            }
+            else
+            {
+                blocY1 = false;
             }
             if (ZoomY2 > pixmap_img1->height())
             {
                 ZoomY2 = pixmap_img1->height();
+                blocY2 = true;
             }
+            else
+            {
+                blocY2 = false;
+            }
+            if (blocX1 == false)
+            {
+                source.adjust(ZoomX1,ZoomY1,ZoomX2,ZoomY2);
+                zx1 = ZoomX1;
+                zx2 = ZoomX2;
+                zy1 = ZoomY1;
+                zy2 = ZoomY2;
+                source.adjust(zx1,zy1,zx2,zy2);
+                this->setWindowTitle(name+name2+" : "+QString::number(slice)+" / "+QString::number(Axe)+"  Zoom : "
+                                     +QString::number(Zoom)+"x  position x :"+QString::number((ZoomX2+ZoomX1)/2)+" / "+QString::number(pixmap_img1->width())
+                                     +" y :"+QString::number((ZoomY1+ZoomY2)/2)+" / "+QString::number(pixmap_img1->height()));
+               // painter.end();
+            }
+            */
             source.adjust(ZoomX1,ZoomY1,ZoomX2,ZoomY2);
+
+           // painter.end();
         }
         QPainter painter(this);
         painter.drawPixmap(target,*pixmap_img1,source);
 
-       // painter.end();
     }
     else
     {
@@ -194,7 +290,7 @@ void MainWindow::paintEvent(QPaintEvent *e) {
         QPainter painter(this);
         painter.drawPixmap(target,*pixmap_img1,source);
     }
-    fprintf(stderr,"ZOOM");
+    fprintf(stderr,"ZOOM %d %d %d",posX,posY,ZoomX1);
     //update();
 
 }
@@ -204,12 +300,6 @@ void MainWindow::affichageImages()
 
     if (name2 == "")
     {
-        //this->setCentralWidget(widget);
-        //this.setCentralWidget(widget);
-        //label1->setPixmap(pixmap_img1->scaled(pixmap_img1->width()/5,pixmap_img1->height()/5,Qt::KeepAspectRatio));
-        //QGridLayout *gridLayout = new QGridLayout(this);
-
-        //gridLayout->addWidget(label1, 0, 0);
         this->setWindowTitle(name+name2+" : "+QString::number(slice)+" / "+QString::number(Axe));
 
         this->resize(pixmap_img1->width()/Zoom,pixmap_img1->height()/Zoom);
@@ -217,13 +307,10 @@ void MainWindow::affichageImages()
     }
     else
     {
-        //label1->setPixmap(pixmap_img1->scaled(pixmap_img1->width(),pixmap_img1->height(),Qt::KeepAspectRatio));
         QGridLayout *gridLayout = new QGridLayout(widget);
         gridLayout->addWidget(label1, 1, 0);
-        this->setWindowTitle(name+name2+" : "+QString::number(slice)+" / "+QString::number(Axe));
-        //fprintf(stderr,"RESIZE %d %d",pixmap_img1->width(),pixmap_img1->height());
+        //this->setWindowTitle(name+name2+" : "+QString::number(slice)+" / "+QString::number(Axe));
         this->resize(pixmap_img1->width()/2,pixmap_img1->height()/2);
-        //label1->
     }
 }
 

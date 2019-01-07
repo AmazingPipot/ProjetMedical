@@ -6,7 +6,7 @@
 #include <QWidget>
 #include <QLabel>
 #include <QGridLayout>
-#include "parserhdr.h"
+#include "parseranalyze75.h"
 #include <iostream>
 #include <QPainter>
 
@@ -20,23 +20,17 @@ class MainWindow : public QMainWindow
 
 public:
 
-    explicit MainWindow(ParserHDR parse, QString fil, QString nam1, QString nam2, int axe, QWidget *parent = 0);
+    explicit MainWindow(ParserAnalyze75 parse, QString fil, QString nam1, QString nam2, int axe, QWidget *parent = 0);
 
 
     MainWindow *Window = this;
     QWidget *widget = new QWidget;
     QPixmap *pixmap_img1;
-   /* QPixmap *pixmap_img2;
-    QPixmap *pixmap_img3;
-    QPixmap *pixmap_imgPrecise;*/
-    ParserHDR Parser;
-    /*int sliceXY = 0;
-    int sliceYZ = 0;
-    int sliceXZ = 0;*/
-    //QLabel  *labelPrecis  = new QLabel;
+
+    ParserAnalyze75 Parser;
+
     QLabel  *label1  = new QLabel;
-    /*QLabel  *label2  = new QLabel;
-    QLabel  *label3  = new QLabel;*/
+
 
     QString filename;
 
@@ -50,7 +44,8 @@ public:
     QString name2 = "";
 
     int Zoom = 2;
-    int ZoomX1, ZoomX2, ZoomY1, ZoomY2, HB, GD;
+    int ZoomX1, ZoomX2, ZoomY1, ZoomY2, zx1, zx2, zy1, zy2, posX, posY;
+    bool blocX1, blocX2, blocY1, blocY2;
     int slice;
     int Axe;
     QPainter painter;

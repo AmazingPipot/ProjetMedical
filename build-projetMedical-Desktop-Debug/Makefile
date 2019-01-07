@@ -52,11 +52,11 @@ OBJECTS_DIR   = ./
 
 SOURCES       = ../projetMedical/main.cpp \
 		../projetMedical/mainwindow.cpp \
-		../projetMedical/parserhdr.cpp qrc_resources.cpp \
+		../projetMedical/parseranalyze75.cpp qrc_resources.cpp \
 		moc_mainwindow.cpp
 OBJECTS       = main.o \
 		mainwindow.o \
-		parserhdr.o \
+		parseranalyze75.o \
 		qrc_resources.o \
 		moc_mainwindow.o
 DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
@@ -134,10 +134,10 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/yacc.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/lex.prf \
 		../projetMedical/projetMedical.pro ../projetMedical/mainwindow.h \
-		../projetMedical/parserhdr.h \
-		../projetMedical/CImg.h ../projetMedical/main.cpp \
+		../projetMedical/CImg.h \
+		../projetMedical/parseranalyze75.h ../projetMedical/main.cpp \
 		../projetMedical/mainwindow.cpp \
-		../projetMedical/parserhdr.cpp
+		../projetMedical/parseranalyze75.cpp
 QMAKE_TARGET  = projetMedical
 DESTDIR       = 
 TARGET        = projetMedical
@@ -324,8 +324,8 @@ distdir: FORCE
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents ../projetMedical/resources.qrc $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../projetMedical/mainwindow.h ../projetMedical/parserhdr.h ../projetMedical/CImg.h $(DISTDIR)/
-	$(COPY_FILE) --parents ../projetMedical/main.cpp ../projetMedical/mainwindow.cpp ../projetMedical/parserhdr.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../projetMedical/mainwindow.h ../projetMedical/CImg.h ../projetMedical/parseranalyze75.h $(DISTDIR)/
+	$(COPY_FILE) --parents ../projetMedical/main.cpp ../projetMedical/mainwindow.cpp ../projetMedical/parseranalyze75.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents ../projetMedical/mainwindow.ui $(DISTDIR)/
 
 
@@ -367,7 +367,7 @@ moc_predefs.h: /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp
 compiler_moc_header_make_all: moc_mainwindow.cpp
 compiler_moc_header_clean:
 	-$(DEL_FILE) moc_mainwindow.cpp
-moc_mainwindow.cpp: ../projetMedical/parserhdr.h \
+moc_mainwindow.cpp: ../projetMedical/parseranalyze75.h \
 		../projetMedical/mainwindow.h \
 		moc_predefs.h \
 		/usr/lib/qt5/bin/moc
@@ -393,16 +393,16 @@ compiler_clean: compiler_rcc_clean compiler_moc_predefs_clean compiler_moc_heade
 ####### Compile
 
 main.o: ../projetMedical/main.cpp ../projetMedical/mainwindow.h \
-		../projetMedical/parserhdr.h
+		../projetMedical/parseranalyze75.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o ../projetMedical/main.cpp
 
 mainwindow.o: ../projetMedical/mainwindow.cpp ../projetMedical/mainwindow.h \
-		../projetMedical/parserhdr.h \
+		../projetMedical/parseranalyze75.h \
 		ui_mainwindow.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mainwindow.o ../projetMedical/mainwindow.cpp
 
-parserhdr.o: ../projetMedical/parserhdr.cpp ../projetMedical/parserhdr.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o parserhdr.o ../projetMedical/parserhdr.cpp
+parseranalyze75.o: ../projetMedical/parseranalyze75.cpp ../projetMedical/parseranalyze75.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o parseranalyze75.o ../projetMedical/parseranalyze75.cpp
 
 qrc_resources.o: qrc_resources.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o qrc_resources.o qrc_resources.cpp
