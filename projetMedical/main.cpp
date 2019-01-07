@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
 
      //return 0;
 
-    /*if(!parser.getImageYZ(parser.width / 2, image))
+    if(!parser.getImageYZ(parser.width / 2, image))
     {
         std::cerr << "Unable to get imageYZ " << parser.width / 2 << std::endl;
         exit(1);
@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
         std::cerr << "Unable to get imageXZ " << parser.height / 2 << std::endl;
         exit(1);
     }
-    image.save("sliceXZ.jpg");*/
+    image.save("sliceXZ.jpg");
 
 
     /*/////// tests ///////
@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
     w1.Window = &wDetaille;
     w1.show();
 
-    /*MainWindow w2(parser,"sliceYZ","Image YZ","",parser.width);
+    MainWindow w2(parser,"sliceYZ","Image YZ","",parser.width);
     w2.setCentralWidget(w2.widget);
     w2.Window = &wDetaille;
     w2.show();
@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
     MainWindow w3(parser,"sliceXZ","Image XZ","",parser.height);
     w3.setCentralWidget(w3.widget);
     w3.Window = &wDetaille;
-    w3.show();*/
+    w3.show();
 
     QTimer Time;
     QObject::connect(&Time,SIGNAL(timeout()), &wDetaille, SLOT(update()));
